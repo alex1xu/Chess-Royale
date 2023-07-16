@@ -1,12 +1,12 @@
 import socket from "./index.js";
 
 export default class Piece {
-  constructor({ rank, file, type, team, seeMoves }) {
+  constructor({ rank, file, type, team }) {
     this.rank = rank;
     this.file = file;
     this.type = type;
     this.team = team;
-    this.seeMoves = seeMoves;
+    this.id=`${rank}.${file}.${type}.${team}`
 
     this.element = document.createElement(`img`);
     this.element.src = `/assets/${team === 0 ? "w" : "b"}${type}.png`;
@@ -19,9 +19,9 @@ export default class Piece {
     this.element.setAttribute(`data-type`, type);
     this.element.setAttribute(`data-team`, team);
 
-    this.element.addEventListener("click", () => {
-      this.seeMoves(this);
-      // socket.emit("input", "nhere");
-    });
+    // this.element.addEventListener("mousedown", () => {
+    //   this.seeMoves(this);
+    //   // socket.emit("input", "nhere");
+    // });
   }
 }

@@ -20,6 +20,7 @@ body {
 
 .content {
   background-color: antiquewhite;
+  padding: .5rem;
 }
 
 .board {
@@ -79,4 +80,28 @@ body {
 .display-move:hover {
   /* border: 1px solid rgba(255, 255, 255, 0.4); */
   box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.35);
+}
+
+.display-capture {
+  box-shadow: inset 0 0 100px 100px rgba(233, 21, 21, 0.25);
+}
+
+.display-capture:hover {
+  /* border: 1px solid rgba(255, 255, 255, 0.4); */
+  box-shadow: inset 0 0 100px 100px rgba(233, 21, 21, 0.35);
+}
+
+
+progress::-webkit-progress-value {
+  background-image: linear-gradient(120deg, #8d34ae 0%,  #eab3ee 80%);
+}
+
+progress::-moz-progress-bar {
+  background-image: linear-gradient(120deg, #8d34ae 0%, #eab3ee 80%);
+}
+
+.elixir-bar {
+  border: 4px solid#323131;
+  height: 3rem;
+  width: 100%;
 }
