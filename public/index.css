@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: aliceblue;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  --dark-color: #4d2626;
+  --light-color: #794838;
+  --dark-background: #323131;
+  --light-background: #565555;
+}
+
+.content {
+  background-color: antiquewhite;
+}
+
+.board {
+  border: 8px solid var(--dark-background);
+  box-shadow: 0 0 4px var(--dark-background);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+
+.square {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.square-label {
+  position: absolute;
+  font-size: 10px;
+  left: 3px;
+  top: 3px;
+}
+
+.square.even {
+  background-color: var(--light-color);
+  color: var(--dark-color);
+}
+.square.odd {
+  background-color: var(--dark-color);
+  color: var(--light-color);
+}
+
+.piece {
+  width: 8vmin;
+  object-fit: contain;
+}
+
+.grabbable:hover {
+  cursor: grab;
+}
+
+.grabbable:active {
+  cursor: grabbing;
+}
+
+.display-move {
+  /* background-image: radial-gradient(
+    circle,
+    rgba(108, 108, 108, 0.5),
+    rgba(108, 108, 108, 0.5) 20%,
+    transparent 20%
+  ); */
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.25);
+}
+
+.display-move:hover {
+  /* border: 1px solid rgba(255, 255, 255, 0.4); */
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.35);
+}

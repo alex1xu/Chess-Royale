@@ -7,10 +7,35 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {});
 
-io.on("connect", (socket) => {
-  console.log("user connected", socket.id);
-});
+const TICK_RATE = 20;
 
-app.use(express.static("public"));
+function tick() {
+  for (const player of players) {
+    const inputs = inputsMap[player.id];
+    if (inputs) {
+    }
+  }
+}
 
-httpServer.listen(5000);
+const inputsMap = {};
+const players = [];
+
+async function main() {
+  io.on("connect", (socket) => {
+    players.push({
+      id: socket.id,
+    });
+
+    socket.on("inputs", (inputs) => {
+      inputsMap[socket.id] = inputs;
+    });
+  });
+
+  app.use(express.static("public"));
+
+  httpServer.listen(5000);
+
+  setInterval((tick) => {}, 1000 / TICK_RATE);
+}
+
+main();
