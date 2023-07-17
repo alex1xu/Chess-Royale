@@ -1,12 +1,10 @@
-import socket from "./index.js";
-
 export default class Piece {
   constructor({ rank, file, type, team }) {
     this.rank = rank;
     this.file = file;
     this.type = type;
     this.team = team;
-    this.id=`${rank}.${file}.${type}.${team}`
+    this.id = `${rank}.${file}.${type}.${team}`;
 
     this.element = document.createElement(`img`);
     this.element.src = `/assets/${team === 0 ? "w" : "b"}${type}.png`;

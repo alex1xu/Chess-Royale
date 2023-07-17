@@ -9,18 +9,19 @@
   </head>
   <body>
     <div class="content">
-      <div  style="padding: .5rem">
-        <h2>
-          Chess Royale
-        </h2>
-        <h4>
-          Room Code: #
-        </h4>
+      <div style="padding: 0.5rem">
+        <h2>Chess Royale</h2>
+        <h4 id="room-code">Connecting...</h4>
       </div>
       <div>
         <div id="board"></div>
-        <div style="padding: .5rem">
-          <progress id="elixir" value="100" max="100"></progress>
+        <div style="padding: 0.5rem; position: relative">
+          <img
+            src="elixir-texture.png"
+            alt="elixir amount"
+            class="elixir-texture"
+          />
+          <progress id="elixir"></progress>
         </div>
       </div>
     </div>
