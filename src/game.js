@@ -9,6 +9,8 @@ class Game {
     this.elixirs = [4, 4];
     this.pieces = [];
 
+    this.clock = 300;
+
     this.initGamePieces();
   }
   initGamePieces() {

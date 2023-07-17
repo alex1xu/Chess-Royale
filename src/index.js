@@ -16,6 +16,15 @@ const ELIXIR_RATE = 0.01;
 let users = {};
 let rooms = {};
 let tickInterval = undefined;
+let clockInterval = undefined;
+
+function clock() {
+  for (const [code, room] of Object.entries(rooms)) {
+    if (!room.game) continue;
+    room.game.clock -= 1;
+    io.in(code).emit("clock-state", room.game.clock);
+  }
+}
 
 function tick() {
   for (const [code, room] of Object.entries(rooms)) {
@@ -33,6 +42,9 @@ function tick() {
 }
 
 async function main() {
+  tickInterval = setInterval(tick, 1000 / TICK_RATE);
+  clockInterval = setInterval(clock, 1000);
+
   io.on("connect", (socket) => {
     const user = new User({ id: socket.id });
     users[user.id] = user;
@@ -67,9 +79,9 @@ async function main() {
             team: 1,
           },
         },
+        stage: "connect",
       });
       io.in(code).emit("pieces-state", game.pieces);
-      tickInterval = setInterval(tick, 1000 / TICK_RATE);
       break;
     }
 
@@ -81,11 +93,13 @@ async function main() {
       rooms[user.id] = room;
       io.in(room.code).emit("room-state", {
         msg: `${room.code}: Waiting for opponent`,
+        stage: "queue",
       });
     }
 
     socket.on("move-piece", (input) => {
-      const game = rooms[users[input.user].room].game;
+      const code = users[input.user].room;
+      const game = rooms[code].game;
 
       let elixir = game.elixirs[input.piece.team];
       const type = input.piece.type;
@@ -111,7 +125,20 @@ async function main() {
       const destinationPiece = game.pieces[destinationKey];
       if (destinationPiece) {
         if (destinationPiece.team == currentPiece.team) return;
-        else delete game.pieces[destinationKey];
+        else {
+          delete game.pieces[destinationKey];
+          if (destinationPiece.type == "king") {
+            io.in(code).emit("room-state", {
+              msg: `${code}: King captured - ${
+                currentPiece.team == 1 ? "Black" : "White"
+              } wins!`,
+              data: {
+                winner: currentPiece.team,
+              },
+              stage: "capture",
+            });
+          }
+        }
       }
       game.pieces[destinationKey] = {
         rank: input.destinationRank,
@@ -120,15 +147,21 @@ async function main() {
         team: currentPiece.team,
       };
 
-      io.in(rooms[users[input.user].room].code).emit(
-        "pieces-state",
-        game.pieces
-      );
+      io.in(code).emit("pieces-state", game.pieces);
+    });
+
+    socket.on("send-message", (message) => {
+      io.in(users[socket.id].room).emit("receive-message", message);
     });
 
     socket.on("disconnect", () => {
+      io.in(users[socket.id].room).emit("room-state", {
+        msg: `${users[socket.id].room}: Game ended`,
+        stage: "disconnect",
+      });
       delete users[socket.id];
-      clearInterval(tickInterval);
+      // clearInterval(tickInterval);
+      // clearInterval(clockInterval);
     });
   });
 

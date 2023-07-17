@@ -13,6 +13,7 @@ export default class Board {
     this.element.classList.add(`board`);
     this.CURRENT_PIECE = undefined;
     this.CURRENT_TEAM = 0;
+    this.clock = document.querySelector("#clock");
     this.init();
 
     this.elixir = new Elixir({
@@ -22,11 +23,15 @@ export default class Board {
     socket.on("elixirs-state", (elixirs) => {
       this.elixir.updateElixir(elixirs[this.CURRENT_TEAM]);
     });
+    socket.on("clock-state", (time) => {
+      const minutes = Math.floor(time / 60);
+      const seconds = time - minutes * 60;
+      this.clock.textContent = `${minutes}:${(
+        new Array(3).join("0") + seconds
+      ).slice(-2)}`;
+    });
   }
-
   init() {
-    this.element.style.width = `80vmin`;
-    this.element.style.height = `80vmin`;
     this.updateChessBoard(this.CURRENT_TEAM);
   }
   updateChessBoard() {

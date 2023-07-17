@@ -27,7 +27,7 @@ export default class Square {
 
     this.elixirCostDiv.appendChild(document.createElement(`p`));
     const elixirImage = document.createElement(`img`);
-    elixirImage.setAttribute("src", "elixir-texture-small.png");
+    elixirImage.setAttribute("src", "assets/elixir-texture-small.png");
     elixirImage.setAttribute("alt", "elixir cost");
     elixirImage.style.width = "15px";
     elixirImage.style.height = "15px";

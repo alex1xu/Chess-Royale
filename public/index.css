@@ -34,7 +34,7 @@ body {
   justify-content: center;
   align-items: center;
   background-color: aliceblue;
-  background-image: url(grass-texture.jpeg);
+  background-image: url(assets/grass-texture.jpeg);
   background-repeat: repeat;
   width: 100vw;
   height: 100vh;
@@ -47,9 +47,19 @@ body {
 
 .content {
   background-color: #e6e2ea;
+  padding: 0.25rem;
+}
+
+#main {
+  width: 90vmin;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
 }
 
 .board {
+  width: calc(90vmin - 10rem);
+  height: calc(90vmin - 10rem);
   border: 8px solid var(--dark-background);
   box-shadow: 0 0 4px var(--dark-background);
   display: grid;
@@ -203,4 +213,112 @@ progress::-moz-progress-bar {
 
 .error {
   color: #ff3333;
+}
+
+.alert {
+  position: absolute;
+  padding: 10px;
+  background-color: #f44336;
+  color: white;
+  opacity: 1;
+  top: 1rem;
+  width: 80vmin;
+  z-index: 2;
+}
+
+.alert.success {
+  background-color: #04aa6d;
+}
+.alert.info {
+  background-color: #2196f3;
+}
+
+.clock {
+  background-color: rgba(72, 72, 72, 0.8);
+  border-radius: 10px;
+  border: 2px solid black;
+  padding: 0.5rem;
+  position: absolute;
+  right: 0.25rem;
+  top: 0.25rem;
+}
+
+#gameplay {
+}
+
+#non-gameplay {
+  margin-left: 3px;
+}
+
+#chatlog {
+  height: 50vmin;
+  background-color: #39527b;
+  border-radius: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat1 {
+  background-color: #404040;
+  color: #bfbfbf;
+  width: calc(100% - 4px);
+  margin: 4px 2px;
+  padding: 3px;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.chat0 {
+  background-color: #bfbfbf;
+  color: #404040;
+  width: calc(100% - 4px);
+  margin: 4px 2px;
+  padding: 3px;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.chat0 > img {
+  object-fit: contain;
+  width: 100%;
+}
+
+.chat1 > img {
+  object-fit: contain;
+  width: 100%;
+}
+
+#chat-input {
+  background-color: white;
+  border-radius: 10px;
+  border: 3px solid black;
+  color: black;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 1rem;
+  width: 100%;
+}
+
+#chat-send {
+  background-color: white;
+  border-radius: 10px;
+  border: 3px solid black;
+  color: black;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 1rem;
+  position: relative;
+}
+
+#chat-send:hover {
+  top: 1px;
+}
+
+#controls {
+  margin-top: auto;
+}
+
+#controls > * {
+  margin-top: 3px;
 }

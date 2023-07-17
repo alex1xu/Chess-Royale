@@ -8,20 +8,46 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
+    <div id="error" class="alert" style="display: none">
+      <strong>Alert</strong>
+    </div>
+    <div id="success" class="alert success" style="display: none">
+      <strong>Alert</strong>
+    </div>
+    <div id="info" class="alert info" style="display: none">
+      <strong>Alert</strong>
+    </div>
     <div class="content">
-      <div style="padding: 0.5rem">
+      <div style="padding: 0.5rem; position: relative">
         <h2>Chess Royale</h2>
         <h4 id="room-code">Connecting...</h4>
+        <div class="clock">
+          <h4 style="color: #eaefd0">Time left:</h4>
+          <h3 id="clock">5:00</h3>
+        </div>
       </div>
-      <div>
-        <div id="board"></div>
-        <div style="padding: 0.5rem; position: relative">
-          <img
-            src="elixir-texture.png"
-            alt="elixir amount"
-            class="elixir-texture"
-          />
-          <progress id="elixir"></progress>
+      <div id="main">
+        <div id="gameplay">
+          <div id="board"></div>
+          <div style="padding: 0.5rem; position: relative">
+            <img
+              src="assets/elixir-texture.png"
+              alt="elixir amount"
+              class="elixir-texture"
+            />
+            <progress id="elixir"></progress>
+          </div>
+        </div>
+        <div id="non-gameplay" style="position: relative; height: 100%">
+          <div id="chatlog"></div>
+          <form id="controls">
+            <input type="text" placeholder="Chat" id="chat-input" />
+            <input type="submit" value="Send" id="chat-send" />
+            <p style="font-size: 0.6rem">
+              Try "!happy". Also bored, celebrate, confused, angry, heheheha,
+              sad, yawn
+            </p>
+          </form>
         </div>
       </div>
     </div>
