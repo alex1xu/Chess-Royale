@@ -257,26 +257,44 @@ progress::-moz-progress-bar {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  max-width: calc(100% - 8px);
 }
 
 .chat1 {
   background-color: #404040;
   color: #bfbfbf;
-  width: calc(100% - 4px);
+  width: calc(100% - 8px);
   margin: 4px 2px;
   padding: 3px;
   border-radius: 5px;
   font-size: 1rem;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.chat-1 {
+  background-color: #557b83;
+  color: white;
+  width: calc(100% - 8px);
+  margin: 4px 2px;
+  padding: 3px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-style: italic;
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .chat0 {
   background-color: #bfbfbf;
   color: #404040;
-  width: calc(100% - 4px);
+  width: calc(100% - 8px);
   margin: 4px 2px;
   padding: 3px;
   border-radius: 5px;
   font-size: 1rem;
+  overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .chat0 > img {
@@ -300,7 +318,7 @@ progress::-moz-progress-bar {
   width: 100%;
 }
 
-#chat-send {
+.classic-button {
   background-color: white;
   border-radius: 10px;
   border: 3px solid black;
@@ -311,7 +329,7 @@ progress::-moz-progress-bar {
   position: relative;
 }
 
-#chat-send:hover {
+.classic-button:hover {
   top: 1px;
 }
 

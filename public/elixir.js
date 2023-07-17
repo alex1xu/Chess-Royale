@@ -1,7 +1,7 @@
 export default class Elixir {
   constructor({ selector, board }) {
-    this.elixir = 4;
-    this.maxElixir = 12;
+    this.elixir = 2;
+    this.maxElixir = 10;
     this.board = board;
     this.element = document.querySelector(selector);
     this.element.classList.add(`elixir-bar`);

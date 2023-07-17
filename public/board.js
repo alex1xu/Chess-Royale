@@ -185,9 +185,9 @@ export default class Board {
       const squareRight = this.gridToSquare(rank + (team ? -1 : 1), file + 1);
       const squareForward = this.gridToSquare(rank + (team ? -2 : 2), file);
       if (squareLeft && squareLeft.occupied && squareLeft.piece.team != team)
-        squareLeft.displayCapture(1);
+        squareLeft.displayCapture(1 + 1);
       if (squareRight && squareRight.occupied && squareRight.piece.team != team)
-        squareRight.displayCapture(1);
+        squareRight.displayCapture(1 + 1);
       if (square && !square.occupied) square.displayMove(1);
       if (
         ((rank == 2 && team == 0) || (rank == 7 && team == 1)) &&
@@ -207,7 +207,7 @@ export default class Board {
       if (piece.type == "king") cost = 2;
       else if (piece.type == "knight") cost = 2;
       if (square && square.occupied && square.piece.team != team) {
-        square.displayCapture(cost);
+        square.displayCapture(cost + 1);
         return;
       } else if (square && !square.occupied) square.displayMove(cost);
       else return;

@@ -38,7 +38,7 @@ socket.on("room-state", (state) => {
     if (state.data.winner == board.CURRENT_TEAM)
       alert("success", "King captured - Victory!");
     else alert("error", "King captured - Defeat!");
-  }
+  } else if (state.stage == "draw") alert("info", "Game over - Draw!");
 });
 
 socket.on("pieces-state", (pieces) => {
@@ -70,6 +70,13 @@ form.addEventListener("submit", (e) => {
 
 socket.on("receive-message", (data) => {
   displayMessage(data.message, data.team);
+});
+
+const ready = document.querySelector("#ready");
+ready.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  socket.emit("ready", "");
 });
 
 function displayMessage(message, team) {

@@ -6,7 +6,7 @@ class Game {
     player2.team = 1;
 
     this.players = [player1, player2];
-    this.elixirs = [4, 4];
+    this.elixirs = [2, 2];
     this.pieces = [];
 
     this.clock = 300;

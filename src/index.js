@@ -10,19 +10,23 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {});
 
 const TICK_RATE = 20;
-const MAX_ELIXIR = 12;
+const MAX_ELIXIR = 10;
 const ELIXIR_RATE = 0.01;
 
 let users = {};
 let rooms = {};
-let tickInterval = undefined;
-let clockInterval = undefined;
 
 function clock() {
   for (const [code, room] of Object.entries(rooms)) {
     if (!room.game) continue;
     room.game.clock -= 1;
     io.in(code).emit("clock-state", room.game.clock);
+    if (room.game.clock <= 0) {
+      io.in(code).emit("room-state", {
+        msg: `${code}: Game over - Draw`,
+        stage: "draw",
+      });
+    }
   }
 }
 
@@ -41,6 +45,39 @@ function tick() {
   }
 }
 
+function sendSystemMessage(message, code) {
+  io.in(code).emit("receive-message", { message: message, team: -1 });
+}
+
+function startGame(room) {
+  const code = room.code;
+  const player1 = room.users[0],
+    player2 = room.users[1];
+  const game = new Game({
+    id: room.code,
+    player1: player1,
+    player2: player2,
+  });
+  player1.game = game;
+  player2.game = game;
+  room.game = game;
+
+  io.in(code).emit("room-state", {
+    msg: `${code}: Game started`,
+    data: {
+      [player1.id]: {
+        team: 0,
+      },
+      [player2.id]: {
+        team: 1,
+      },
+    },
+    stage: "connect",
+  });
+  io.in(code).emit("pieces-state", game.pieces);
+  sendSystemMessage("Game started", code);
+}
+
 async function main() {
   tickInterval = setInterval(tick, 1000 / TICK_RATE);
   clockInterval = setInterval(clock, 1000);
@@ -56,32 +93,12 @@ async function main() {
       room.users.push(user);
       user.room = code;
       roomNeeded = false;
-
-      const player1 = room.users[0],
-        player2 = room.users[1];
-      const game = new Game({
-        id: room.code,
-        player1: player1,
-        player2: player2,
-      });
-      player1.game = game;
-      player2.game = game;
-      room.game = game;
-
       socket.join(code);
-      io.in(code).emit("room-state", {
-        msg: `${code}: Game connected`,
-        data: {
-          [player1.id]: {
-            team: 0,
-          },
-          [player2.id]: {
-            team: 1,
-          },
-        },
-        stage: "connect",
+      sendSystemMessage(`Player ${socket.id} joined the room`, room.code);
+      io.in(room.code).emit("room-state", {
+        msg: `${room.code}: Click ready`,
+        stage: "queue",
       });
-      io.in(code).emit("pieces-state", game.pieces);
       break;
     }
 
@@ -89,10 +106,11 @@ async function main() {
       const room = {
         users: [user],
         code: user.id,
+        ready: [],
       };
       rooms[user.id] = room;
       io.in(room.code).emit("room-state", {
-        msg: `${room.code}: Waiting for opponent`,
+        msg: `${room.code}: Waiting for an opponent`,
         stage: "queue",
       });
     }
@@ -101,28 +119,36 @@ async function main() {
       const code = users[input.user].room;
       const game = rooms[code].game;
 
+      const currentKey = `${input.piece.rank}-${input.piece.file}`;
+      const currentPiece = game.pieces[currentKey];
+      if (!currentPiece) return;
+      const destinationKey = `${input.destinationRank}-${input.destinationFile}`;
+      const destinationPiece = game.pieces[destinationKey];
+
       let elixir = game.elixirs[input.piece.team];
       const type = input.piece.type;
+      const attackCost = destinationPiece ? 1 : 0;
       const distance = Math.max(
         Math.abs(input.piece.rank - input.destinationRank),
         Math.abs(input.piece.file - input.destinationFile)
       );
-      if (type == "pawn" && elixir >= 1) elixir -= 1;
-      else if (type == "king" && elixir >= 2) elixir -= 2;
-      else if (type == "knight" && elixir >= 2) elixir -= 2;
-      else if ((type == "rook" || type == "bishop") && elixir >= distance)
-        elixir -= distance;
-      else if (type == "queen" && elixir >= distance) elixir -= distance;
+      if (type == "pawn" && elixir >= 1 + attackCost) elixir -= 1 + attackCost;
+      else if (type == "king" && elixir >= 2 + attackCost)
+        elixir -= 2 + attackCost;
+      else if (type == "knight" && elixir >= 2 + attackCost)
+        elixir -= 2 + attackCost;
+      else if (
+        (type == "rook" || type == "bishop") &&
+        elixir >= distance + attackCost
+      )
+        elixir -= distance + attackCost;
+      else if (type == "queen" && elixir >= distance + attackCost)
+        elixir -= distance + attackCost;
       else return;
+
       game.elixirs[input.piece.team] = elixir;
 
-      const currentKey = `${input.piece.rank}-${input.piece.file}`;
-      const currentPiece = game.pieces[currentKey];
-      if (!currentPiece) return;
       delete game.pieces[currentKey];
-
-      const destinationKey = `${input.destinationRank}-${input.destinationFile}`;
-      const destinationPiece = game.pieces[destinationKey];
       if (destinationPiece) {
         if (destinationPiece.team == currentPiece.team) return;
         else {
@@ -150,6 +176,13 @@ async function main() {
       io.in(code).emit("pieces-state", game.pieces);
     });
 
+    socket.on("ready", () => {
+      const room = rooms[users[socket.id].room];
+      if (!room.ready.includes(socket.id)) room.ready.push(socket.id);
+      sendSystemMessage(`Player ${socket.id} is ready`, room.code);
+      if (room.ready.length >= 2 && !room.game) startGame(room);
+    });
+
     socket.on("send-message", (message) => {
       io.in(users[socket.id].room).emit("receive-message", message);
     });
@@ -160,8 +193,6 @@ async function main() {
         stage: "disconnect",
       });
       delete users[socket.id];
-      // clearInterval(tickInterval);
-      // clearInterval(clockInterval);
     });
   });
 
