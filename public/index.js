@@ -18,6 +18,18 @@ const gifs = [
   "heheheha",
   "sad",
   "yawn",
+  "cr",
+  "excited",
+  "frustrated",
+  "hog",
+  "kiss",
+  "nope",
+  "party",
+  "queen",
+  "scared",
+  "sigh",
+  "slurp",
+  "sob",
 ];
 
 socket.on("room-state", (state) => {
