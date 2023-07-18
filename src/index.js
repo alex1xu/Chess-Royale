@@ -109,9 +109,9 @@ function endGame(room, status) {
 async function main() {
   setInterval(tick, 1000 / TICK_RATE);
   setInterval(clock, 1000);
-  setInterval(() => {
-    io.emit("rooms", rooms);
-  }, 5000);
+  // setInterval(() => {
+  //   io.emit("rooms", rooms);
+  // }, 5000);
 
   io.on("connect", (socket) => {
     io.emit("rooms", rooms);

@@ -62,19 +62,19 @@ export function alert(type, msg) {
   }, 3000);
 }
 
-const roomList = document.querySelector("#roomlist");
-socket.on("rooms", (rooms) => {
-  roomList.innerHTML = "";
-  const header = document.createElement(`h3`);
-  header.textContent = "Rooms: ";
-  roomList.appendChild(header);
-  for (const [code, room] of Object.entries(rooms)) {
-    const link = document.createElement(`a`);
-    link.textContent = code;
-    link.classList.add(`room-link`);
-    roomList.appendChild(link);
-  }
-});
+// const roomList = document.querySelector("#roomlist");
+// socket.on("rooms", (rooms) => {
+//   roomList.innerHTML = "";
+//   const header = document.createElement(`h3`);
+//   header.textContent = "Rooms: ";
+//   roomList.appendChild(header);
+//   for (const [code, room] of Object.entries(rooms)) {
+//     const link = document.createElement(`a`);
+//     link.textContent = code;
+//     link.classList.add(`room-link`);
+//     roomList.appendChild(link);
+//   }
+// });
 
 const form = document.querySelector("#controls");
 const messageInput = document.querySelector("#chat-input");
