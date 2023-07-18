@@ -33,12 +33,17 @@ socket.on("room-state", (state) => {
     board.updateChessBoard();
   } else if (state.stage == "disconnect") {
     alert("error", "Opponent disconnected");
+    ready.style.display = "flex";
   } else if (state.stage == "queue") alert("info", "You are #1 in queue");
   else if (state.stage == "capture") {
     if (state.data.winner == board.CURRENT_TEAM)
       alert("success", "King captured - Victory!");
     else alert("error", "King captured - Defeat!");
-  } else if (state.stage == "draw") alert("info", "Game over - Draw!");
+    ready.style.display = "flex";
+  } else if (state.stage == "draw") {
+    alert("info", "Game over - Draw!");
+    ready.style.display = "flex";
+  }
 });
 
 socket.on("pieces-state", (pieces) => {
@@ -56,6 +61,20 @@ export function alert(type, msg) {
     alert.style.display = "none";
   }, 3000);
 }
+
+const roomList = document.querySelector("#roomlist");
+socket.on("rooms", (rooms) => {
+  roomList.innerHTML = "";
+  const header = document.createElement(`h3`);
+  header.textContent = "Rooms: ";
+  roomList.appendChild(header);
+  for (const [code, room] of Object.entries(rooms)) {
+    const link = document.createElement(`a`);
+    link.textContent = code;
+    link.classList.add(`room-link`);
+    roomList.appendChild(link);
+  }
+});
 
 const form = document.querySelector("#controls");
 const messageInput = document.querySelector("#chat-input");
@@ -75,6 +94,9 @@ socket.on("receive-message", (data) => {
 const ready = document.querySelector("#ready");
 ready.addEventListener("click", (e) => {
   e.preventDefault();
+
+  ready.style.display = "none";
+  ready.textContent = "Rematch";
 
   socket.emit("ready", "");
 });

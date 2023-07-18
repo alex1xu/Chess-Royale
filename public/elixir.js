@@ -9,7 +9,7 @@ export default class Elixir {
     this.element.setAttribute("max", this.maxElixir);
 
     this.label = document.createElement(`p`);
-    this.label.textContent = `4`;
+    this.label.textContent = `2`;
     this.label.classList.add(`elixir-label`);
     this.element.parentElement.appendChild(this.label);
 

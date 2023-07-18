@@ -21,12 +21,7 @@ function clock() {
     if (!room.game) continue;
     room.game.clock -= 1;
     io.in(code).emit("clock-state", room.game.clock);
-    if (room.game.clock <= 0) {
-      io.in(code).emit("room-state", {
-        msg: `${code}: Game over - Draw`,
-        stage: "draw",
-      });
-    }
+    if (room.game.clock <= 0) endGame(room, { type: "draw" });
   }
 }
 
@@ -78,11 +73,49 @@ function startGame(room) {
   sendSystemMessage("Game started", code);
 }
 
+function endGame(room, status) {
+  const code = room.code;
+  const player1 = room.users[0],
+    player2 = room.users[1];
+  if (player1) player1.game = undefined;
+  if (player2) player2.game = undefined;
+  room.game = undefined;
+
+  if (status.type == "capture") {
+    io.in(code).emit("room-state", {
+      msg: `${code}: King captured - ${
+        status.winner == 1 ? "Black" : "White"
+      } wins!`,
+      data: {
+        winner: status.winner,
+      },
+      stage: "capture",
+    });
+  } else if (status.type == "draw") {
+    io.in(code).emit("room-state", {
+      msg: `${code}: Game over - Draw`,
+      stage: "draw",
+    });
+  } else if (status.type == "quit") {
+    io.in(code).emit("room-state", {
+      msg: `${code}: Game over - Aborted`,
+      stage: "draw",
+    });
+  }
+
+  sendSystemMessage("Game ended", code);
+}
+
 async function main() {
-  tickInterval = setInterval(tick, 1000 / TICK_RATE);
-  clockInterval = setInterval(clock, 1000);
+  setInterval(tick, 1000 / TICK_RATE);
+  setInterval(clock, 1000);
+  setInterval(() => {
+    io.emit("rooms", rooms);
+  }, 5000);
 
   io.on("connect", (socket) => {
+    io.emit("rooms", rooms);
+
     const user = new User({ id: socket.id });
     users[user.id] = user;
     socket.join(user.id);
@@ -153,17 +186,11 @@ async function main() {
         if (destinationPiece.team == currentPiece.team) return;
         else {
           delete game.pieces[destinationKey];
-          if (destinationPiece.type == "king") {
-            io.in(code).emit("room-state", {
-              msg: `${code}: King captured - ${
-                currentPiece.team == 1 ? "Black" : "White"
-              } wins!`,
-              data: {
-                winner: currentPiece.team,
-              },
-              stage: "capture",
+          if (destinationPiece.type == "king")
+            endGame(rooms[code], {
+              type: "capture",
+              winner: currentPiece.team,
             });
-          }
         }
       }
       game.pieces[destinationKey] = {
@@ -179,8 +206,14 @@ async function main() {
     socket.on("ready", () => {
       const room = rooms[users[socket.id].room];
       if (!room.ready.includes(socket.id)) room.ready.push(socket.id);
-      sendSystemMessage(`Player ${socket.id} is ready`, room.code);
-      if (room.ready.length >= 2 && !room.game) startGame(room);
+      sendSystemMessage(
+        `Player ${socket.id} is ready (${room.ready.length}/2)`,
+        room.code
+      );
+      if (room.ready.length >= 2 && !room.game) {
+        startGame(room);
+        room.ready = [];
+      }
     });
 
     socket.on("send-message", (message) => {
@@ -188,10 +221,7 @@ async function main() {
     });
 
     socket.on("disconnect", () => {
-      io.in(users[socket.id].room).emit("room-state", {
-        msg: `${users[socket.id].room}: Game ended`,
-        stage: "disconnect",
-      });
+      endGame(rooms[users[socket.id].room], { type: "quit" });
       delete users[socket.id];
     });
   });
