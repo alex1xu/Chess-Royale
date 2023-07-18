@@ -30,6 +30,9 @@ const gifs = [
   "sigh",
   "slurp",
   "sob",
+  "blunder",
+  "blunder2",
+  "unbelievable",
 ];
 
 socket.on("room-state", (state) => {
