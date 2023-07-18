@@ -7,6 +7,7 @@ export default class Square {
     this.occupied = false;
     this.movable = false;
     this.capturable = false;
+    this.castleable = undefined;
     this.clickSquare = clickSquare;
     this.elixir = elixir;
 
@@ -51,11 +52,23 @@ export default class Square {
     this.piece = undefined;
     this.movable = false;
     this.capturable = false;
+    this.castleable = undefined;
     this.elixirCostDiv.style.display = "none";
   }
   displayMove(cost) {
     this.element.classList.add("display-move");
     this.movable = true;
+
+    this.elixirCostDiv.style.display = "flex";
+    this.elixirCostDiv.children[0].textContent = `x${cost} `;
+    if (cost > this.elixir.elixir) this.elixirCostDiv.classList.add("error");
+    else this.elixirCostDiv.classList.remove("error");
+  }
+  displayCastle(side) {
+    const cost = 4;
+    this.element.classList.add("display-move");
+    this.movable = true;
+    this.castleable = side;
 
     this.elixirCostDiv.style.display = "flex";
     this.elixirCostDiv.children[0].textContent = `x${cost} `;
@@ -76,6 +89,7 @@ export default class Square {
     this.element.classList.remove("display-capture");
     this.movable = false;
     this.capturable = false;
+    this.castleable = undefined;
     this.elixirCostDiv.style.display = "none";
   }
 }

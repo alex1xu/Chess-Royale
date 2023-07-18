@@ -11,7 +11,7 @@ const io = new Server(httpServer, {});
 
 const TICK_RATE = 20;
 const MAX_ELIXIR = 10;
-const ELIXIR_RATE = 0.01;
+const ELIXIR_RATE = 0.0125;
 
 let users = {};
 let rooms = {};
@@ -152,6 +152,8 @@ async function main() {
       const code = users[input.user].room;
       const game = rooms[code].game;
 
+      //check for game instead of throwing errors
+
       const currentKey = `${input.piece.rank}-${input.piece.file}`;
       const currentPiece = game.pieces[currentKey];
       if (!currentPiece) return;
@@ -166,6 +168,7 @@ async function main() {
         Math.abs(input.piece.file - input.destinationFile)
       );
       if (type == "pawn" && elixir >= 1 + attackCost) elixir -= 1 + attackCost;
+      else if (input.special == "castle" && elixir >= 4) elixir -= 4;
       else if (type == "king" && elixir >= 2 + attackCost)
         elixir -= 2 + attackCost;
       else if (type == "knight" && elixir >= 2 + attackCost)
@@ -182,6 +185,7 @@ async function main() {
       game.elixirs[input.piece.team] = elixir;
 
       delete game.pieces[currentKey];
+
       if (destinationPiece) {
         if (destinationPiece.team == currentPiece.team) return;
         else {
@@ -193,12 +197,56 @@ async function main() {
             });
         }
       }
-      game.pieces[destinationKey] = {
-        rank: input.destinationRank,
-        file: input.destinationFile,
-        type: currentPiece.type,
-        team: currentPiece.team,
-      };
+
+      if (
+        currentPiece.type == "pawn" &&
+        ((input.destinationRank == 1 && currentPiece.team == 1) ||
+          (input.destinationRank == 8 && currentPiece.team == 0))
+      ) {
+        game.pieces[destinationKey] = {
+          rank: input.destinationRank,
+          file: input.destinationFile,
+          type: "queen",
+          team: currentPiece.team,
+        };
+      } else if (input.special == "castle") {
+        if (input.side == "L") {
+          delete game.pieces[`${currentPiece.rank}-${currentPiece.file - 4}`];
+          game.pieces[`${currentPiece.rank}-${currentPiece.file - 2}`] = {
+            rank: currentPiece.rank,
+            file: currentPiece.file - 2,
+            type: "rook",
+            team: currentPiece.team,
+          };
+          game.pieces[`${currentPiece.rank}-${currentPiece.file - 3}`] = {
+            rank: currentPiece.rank,
+            file: currentPiece.file - 3,
+            type: "king",
+            team: currentPiece.team,
+          };
+        } else {
+          delete game.pieces[`${currentPiece.rank}-${currentPiece.file + 3}`];
+          game.pieces[`${currentPiece.rank}-${currentPiece.file + 1}`] = {
+            rank: currentPiece.rank,
+            file: currentPiece.file + 1,
+            type: "rook",
+            team: currentPiece.team,
+          };
+          game.pieces[`${currentPiece.rank}-${currentPiece.file + 2}`] = {
+            rank: currentPiece.rank,
+            file: currentPiece.file + 2,
+            type: "king",
+            team: currentPiece.team,
+          };
+        }
+      } else {
+        game.pieces[destinationKey] = {
+          rank: input.destinationRank,
+          file: input.destinationFile,
+          type: currentPiece.type,
+          team: currentPiece.team,
+        };
+      }
 
       io.in(code).emit("pieces-state", game.pieces);
     });

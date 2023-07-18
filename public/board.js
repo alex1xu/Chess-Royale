@@ -6,13 +6,9 @@ let BOARD_SIZE = 8;
 
 export default class Board {
   constructor({ selector, socket }) {
-    this.squares = [];
-    this.pieces = {};
     this.socket = socket;
     this.element = document.querySelector(selector);
     this.element.classList.add(`board`);
-    this.CURRENT_PIECE = undefined;
-    this.CURRENT_TEAM = 0;
     this.clock = document.querySelector("#clock");
     this.init();
 
@@ -32,6 +28,13 @@ export default class Board {
     });
   }
   init() {
+    this.squares = [];
+    this.pieces = {};
+    this.CURRENT_PIECE = undefined;
+    this.CURRENT_TEAM = 0;
+    this.KING_MOVED = false;
+    this.ROOKA_MOVED = false;
+    this.ROOKH_MOVED = false;
     this.updateChessBoard(this.CURRENT_TEAM);
   }
   updateChessBoard() {
@@ -107,12 +110,30 @@ export default class Board {
       this.CURRENT_PIECE &&
       (clickedSquare.movable || clickedSquare.capturable)
     ) {
-      this.socket.emit("move-piece", {
-        user: this.socket.id,
-        piece: this.CURRENT_PIECE,
-        destinationRank: clickedSquare.rank,
-        destinationFile: clickedSquare.file,
-      });
+      if (clickedSquare.castleable == "L" || clickedSquare.castleable == "R")
+        this.socket.emit("move-piece", {
+          special: "castle",
+          user: this.socket.id,
+          piece: this.CURRENT_PIECE,
+          side: clickedSquare.castleable,
+        });
+      else
+        this.socket.emit("move-piece", {
+          user: this.socket.id,
+          piece: this.CURRENT_PIECE,
+          destinationRank: clickedSquare.rank,
+          destinationFile: clickedSquare.file,
+        });
+
+      if (this.CURRENT_PIECE.type == "rook" && this.CURRENT_PIECE.file == 0)
+        this.ROOKA_MOVED = true;
+      else if (
+        this.CURRENT_PIECE.type == "rook" &&
+        this.CURRENT_PIECE.file == 7
+      )
+        this.ROOKH_MOVED = true;
+      else if (this.CURRENT_PIECE.type == "king") this.KING_MOVED = true;
+
       this.CURRENT_PIECE = undefined;
     } else {
       this.CURRENT_PIECE = undefined;
@@ -172,7 +193,40 @@ export default class Board {
       this.checkDirection(piece, -1, 0, 1);
       this.checkDirection(piece, 0, 1, 1);
       this.checkDirection(piece, 0, -1, 1);
+      this.checkCastle(piece);
     }
+  }
+  checkCastle(piece) {
+    if (this.KING_MOVED) return;
+
+    const rank = piece.rank,
+      file = piece.file;
+
+    const squareR1 = this.gridToSquare(rank, file + 1);
+    const squareR2 = this.gridToSquare(rank, file + 2);
+    const pieceR3 = this.gridToSquare(rank, file + 3)?.piece;
+    const squareL1 = this.gridToSquare(rank, file - 1);
+    const squareL2 = this.gridToSquare(rank, file - 2);
+    const squareL3 = this.gridToSquare(rank, file - 3);
+    const pieceL4 = this.gridToSquare(rank, file - 4)?.piece;
+
+    if (
+      !squareR1?.occupied &&
+      !squareR2?.occupied &&
+      !this.ROOKH_MOVED &&
+      pieceR3?.type == "rook" &&
+      pieceR3?.team == this.CURRENT_TEAM
+    )
+      squareR2.displayCastle("R");
+    if (
+      !squareL1?.occupied &&
+      !squareL2?.occupied &&
+      !squareL3?.occupied &&
+      !this.ROOKA_MOVED &&
+      pieceL4?.type == "rook" &&
+      pieceL4?.team == this.CURRENT_TEAM
+    )
+      squareL3.displayCastle("L");
   }
   checkDirection(piece, rankDelta, fileDelta, max = BOARD_SIZE) {
     const rank = piece.rank,
