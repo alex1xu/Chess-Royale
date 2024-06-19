@@ -1,11 +1,11 @@
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
-const Game = require("./game.js");
-const User = require("./user.js");
+const Game = require("./src/game.js");
+const User = require("./src/user.js");
 
 const app = express();
-app.use(express.static("../public"));
+app.use(express.static("public"));
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {});
