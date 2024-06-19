@@ -5,7 +5,7 @@ const Game = require("./game.js");
 const User = require("./user.js");
 
 const app = express();
-app.use(express.static("public"));
+app.use(express.static("../public"));
 const httpServer = createServer(app);
 
 const io = new Server(httpServer, {});
